@@ -159,6 +159,11 @@ function GuessingScreen({
             src={team.hintImage}
             alt="Who's that Pokémon? (silhouette)"
             className="silhouette h-40 w-40 object-contain"
+            onError={(e) => {
+              // Degrade gracefully rather than showing a broken-image icon
+              // if a sprite is ever missing from the deployment.
+              e.currentTarget.closest("div")!.style.display = "none";
+            }}
           />
         </div>
       )}
