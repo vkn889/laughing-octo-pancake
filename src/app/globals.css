@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/* Pokédex red / white / blue palette (SRD 2.6) */
+:root {
+  --pokedex-red: #dc2626;
+  --pokedex-red-dark: #991b1b;
+  --pokedex-blue: #2563eb;
+  --pokedex-blue-dark: #1e3a8a;
+  --pokedex-screen: #eef3f8;
+  --pokedex-ink: #14181f;
+  --pokedex-white: #ffffff;
+}
+
+@theme inline {
+  --color-pokedex-red: var(--pokedex-red);
+  --color-pokedex-red-dark: var(--pokedex-red-dark);
+  --color-pokedex-blue: var(--pokedex-blue);
+  --color-pokedex-blue-dark: var(--pokedex-blue-dark);
+  --color-pokedex-screen: var(--pokedex-screen);
+  --color-pokedex-ink: var(--pokedex-ink);
+  --font-pixel: var(--font-pixel);
+  --font-body: var(--font-body);
+}
+
+body {
+  background: var(--pokedex-red);
+  color: var(--pokedex-ink);
+  font-family: var(--font-body), ui-monospace, monospace;
+}
+
+/* Chunky black border + offset drop shadow used on every panel/button so
+   the whole UI reads as one retro device (SRD 2.6). */
+.pixel-panel {
+  border: 4px solid var(--pokedex-ink);
+  box-shadow: 6px 6px 0 var(--pokedex-ink);
+  border-radius: 4px;
+}
+
+.pixel-btn {
+  border: 4px solid var(--pokedex-ink);
+  box-shadow: 4px 4px 0 var(--pokedex-ink);
+  border-radius: 4px;
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
+  touch-action: manipulation;
+}
+
+.pixel-btn:active:not(:disabled) {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 var(--pokedex-ink);
+}
+
+.pixel-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.font-pixel {
+  font-family: var(--font-pixel), monospace;
+  letter-spacing: 0.02em;
+}
+
+/* "Who's That Pokémon?" style black silhouette for hint images. */
+.silhouette {
+  filter: brightness(0) saturate(100%);
+  image-rendering: pixelated;
+}
+
+.silhouette-reveal {
+  filter: none;
+  transition: filter 0.4s ease;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.animate-blink {
+  animation: blink 1.4s ease-in-out infinite;
+}
