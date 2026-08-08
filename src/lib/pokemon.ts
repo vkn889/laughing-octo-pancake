@@ -135,6 +135,15 @@ export const POKEMON: PokemonClue[] = [
     acceptedAnswers: ["charmander"],
   }),
   normal({
+    id: "charmeleon",
+    name: "Charmeleon",
+    lineId: "charmander-line",
+    isBasicStage: false,
+    hintText:
+      "Fire-type, mid-stage of that same Kanto starter line. Quick-tempered, and the flame on its tail burns hotter and more intensely the harder it fights.",
+    acceptedAnswers: ["charmeleon"],
+  }),
+  normal({
     id: "charizard-ex",
     name: "Charizard (Ex)",
     lineId: "charmander-line",
@@ -600,7 +609,214 @@ export const POKEMON: PokemonClue[] = [
     acceptedAnswers: ["gardevoir"],
   }),
 
+  // --- Fennekin (standalone, Kalos starter) ---
+  normal({
+    id: "fennekin",
+    name: "Fennekin",
+    lineId: "fennekin-line",
+    isBasicStage: true,
+    hintText:
+      "Fire-type Kalos starter, the \"Fox Pokémon.\" Snacks on twigs, and the heat radiating from its flame rises whenever it gets angry.",
+    acceptedAnswers: ["fennekin"],
+  }),
+
+  // --- Zoroark (standalone, final stage of an illusion-casting line) ---
+  normal({
+    id: "zoroark",
+    name: "Zoroark",
+    lineId: "zoroark-line",
+    isBasicStage: false,
+    hintText:
+      "Dark-type, final stage of an illusion-casting line. Conjures convincing illusions of people and Pokémon to protect its den from intruders.",
+    acceptedAnswers: ["zoroark"],
+  }),
+
+  // --- Loudred (standalone, mid-stage of a Hoenn line) ---
+  normal({
+    id: "loudred",
+    name: "Loudred",
+    lineId: "loudred-line",
+    isBasicStage: false,
+    hintText:
+      "Normal-type, mid-stage of a Hoenn line. The orifices covering its body amplify its voice into a roar loud enough to be heard over a mile away.",
+    acceptedAnswers: ["loudred"],
+  }),
+
+  // --- Beldum line (full 3-stage) ---
+  normal({
+    id: "beldum",
+    name: "Beldum",
+    lineId: "beldum-line",
+    isBasicStage: true,
+    hintText:
+      "Steel/Psychic dual-type, the \"Iron Ball Pokémon.\" Its whole body works like a magnet, and it hovers by generating a weak magnetic field.",
+    acceptedAnswers: ["beldum"],
+  }),
+  normal({
+    id: "metang",
+    name: "Metang",
+    lineId: "beldum-line",
+    isBasicStage: false,
+    hintText:
+      "Steel/Psychic dual-type, mid-stage of that line, formed when a pair of the previous stage fuse magnetically into one body.",
+    acceptedAnswers: ["metang"],
+  }),
+  normal({
+    id: "metagross",
+    name: "Metagross",
+    lineId: "beldum-line",
+    isBasicStage: false,
+    hintText:
+      "Steel/Psychic dual-type, final stage of that line, formed by a pair of the previous stage fusing together. Its brain is said to out-calculate a supercomputer.",
+    acceptedAnswers: ["metagross"],
+  }),
+
+  // --- Rookidee line (full 3-stage) ---
+  normal({
+    id: "rookidee",
+    name: "Rookidee",
+    lineId: "rookidee-line",
+    isBasicStage: true,
+    hintText:
+      "Flying-type, the \"Tiny Bird Pokémon,\" basic stage of a Galar line. Small but fearless, willing to challenge opponents many times its size.",
+    acceptedAnswers: ["rookidee"],
+  }),
+  normal({
+    id: "corvisquire",
+    name: "Corvisquire",
+    lineId: "rookidee-line",
+    isBasicStage: false,
+    hintText:
+      "Flying-type, mid-stage of that Galar line. Fiercely territorial, driving off intruders by pelting them with pebbles from above.",
+    acceptedAnswers: ["corvisquire"],
+  }),
+  normal({
+    id: "corviknight",
+    name: "Corviknight",
+    lineId: "rookidee-line",
+    isBasicStage: false,
+    hintText:
+      "Flying/Steel dual-type, final stage of that Galar line. Its body is armored enough, and its wings strong enough, that it's used as an informal taxi service back home.",
+    acceptedAnswers: ["corviknight"],
+  }),
+
+  // --- Gyarados (standalone, dramatic evolution of a much calmer fish) ---
+  normal({
+    id: "gyarados",
+    name: "Gyarados",
+    lineId: "gyarados-line",
+    isBasicStage: false,
+    hintText:
+      "Water/Flying dual-type, famous for an explosive temper, once described in old records as capable of leveling a whole village in a rage.",
+    acceptedAnswers: ["gyarados"],
+  }),
+
   // --- Legendaries / Mythicals (15 pts, no evolutionary line grouping) ---
+  legendary({
+    id: "ho-oh",
+    name: "Ho-Oh (Reverse Holo)",
+    hintText:
+      "Fire/Flying Legendary, the \"Rainbow Pokémon.\" Said to bring lasting happiness to whoever sees it, with wings said to hold every color there is.",
+    acceptedAnswers: ["ho-oh", "ho oh", "hooh"],
+  }),
+  legendary({
+    id: "reshiram",
+    name: "Reshiram",
+    hintText:
+      "Dragon/Fire Legendary, said to scorch the world in fire in the name of its ideals, one half of a duo bound to an old hero's legend.",
+    acceptedAnswers: ["reshiram"],
+  }),
+  legendary({
+    id: "keldeo-ex",
+    name: "Keldeo (EX)",
+    hintText:
+      "Water-type Mythical, one of a quartet of sword-wielding Legendaries. Trains under a waterfall to sharpen the horn on its head into a blade.",
+    acceptedAnswers: ["keldeo"],
+  }),
+  legendary({
+    id: "terrakion",
+    name: "Terrakion",
+    hintText:
+      "Rock/Fighting Legendary, another of that same sword-wielding quartet. Charges through anything in its path, said to be strong enough to topple a castle wall.",
+    acceptedAnswers: ["terrakion"],
+  }),
+  legendary({
+    id: "tapu-koko",
+    name: "Tapu Koko",
+    hintText:
+      "Electric/Fairy Legendary, guardian deity of one of the Alola islands. Vanishes in a flash of lightning the instant a fight is over.",
+    acceptedAnswers: ["tapu koko", "tapu-koko"],
+  }),
+  legendary({
+    id: "gouging-fire",
+    name: "Gouging Fire",
+    hintText:
+      "Fire/Dragon-type, an ancient species with paradoxical traits, pulled forward through time from a distant past. Burning gases spill constantly from vents along its body.",
+    acceptedAnswers: ["gouging fire"],
+  }),
+  legendary({
+    id: "darkrai",
+    name: "Darkrai",
+    hintText:
+      "Dark-type Mythical, said to lure people and Pokémon into deep, nightmare-filled sleep just by appearing nearby.",
+    acceptedAnswers: ["darkrai"],
+  }),
+  legendary({
+    id: "volcanion-ex",
+    name: "Volcanion (Ex)",
+    hintText:
+      "Fire/Water dual-type Mythical, blasts scalding steam from the vents on its back with enough force to blow a mountain apart.",
+    acceptedAnswers: ["volcanion"],
+  }),
+  legendary({
+    id: "xerneas-ex",
+    name: "Xerneas (EX)",
+    hintText:
+      "Fairy-type Legendary, said to be able to share eternal life, its antlers glowing every color of the rainbow while active.",
+    acceptedAnswers: ["xerneas"],
+  }),
+  legendary({
+    id: "cobalion",
+    name: "Cobalion",
+    hintText:
+      "Steel/Fighting Legendary, leader of that same sword-wielding quartet. Said to have led an army of Pokémon to shield others from a war long ago.",
+    acceptedAnswers: ["cobalion"],
+  }),
+  legendary({
+    id: "regirock-ex",
+    name: "Regirock (Ex)",
+    hintText:
+      "Rock-type Legendary, its entire body assembled from stones gathered at the site where it was born, said to repair itself using rocks from that same place.",
+    acceptedAnswers: ["regirock"],
+  }),
+  legendary({
+    id: "regidrago-vstar",
+    name: "Regidrago (Vstar)",
+    hintText:
+      "Dragon-type Legendary, its body formed from solidified draconic energy rather than any known material.",
+    acceptedAnswers: ["regidrago"],
+  }),
+  legendary({
+    id: "regieleki-v",
+    name: "Regieleki (V)",
+    hintText:
+      "Electric-type Legendary, said to be the fastest of all Pokémon, discharging enough electricity to black out an entire town.",
+    acceptedAnswers: ["regieleki"],
+  }),
+  legendary({
+    id: "roaring-moon-ex",
+    name: "Roaring Moon (Ex)",
+    hintText:
+      "Dragon/Dark-type, an ancient species with paradoxical traits, pulled forward through time from a distant past. Its roar is said to carry to the next mountain over.",
+    acceptedAnswers: ["roaring moon"],
+  }),
+  legendary({
+    id: "raging-bolt-ex",
+    name: "Raging Bolt (Ex)",
+    hintText:
+      "Electric/Dragon-type, an ancient species with paradoxical traits, pulled forward through time from a distant past. Trails crackling electricity behind it as it moves.",
+    acceptedAnswers: ["raging bolt"],
+  }),
   legendary({
     id: "mew-vmax",
     name: "Mew (Vmax)",
@@ -644,6 +860,21 @@ export const POKEMON: PokemonClue[] = [
     hintText:
       "Dragon/Flying Legendary, said to have lived for hundreds of millions of years in the ozone layer. Mega Evolves without a stone, through sheer force of will alone, into a form with no visible limbs at all, just an endless coiled body.",
     acceptedAnswers: ["mega rayquaza", "rayquaza"],
+  }),
+  chase({
+    id: "mega-charizard-x-chase",
+    name: "Mega Charizard X (Ex) (Chase Print)",
+    image: "/pokemon/mega-charizard-x-ex.png",
+    hintText:
+      "A second copy of the Mega Evolved form of a Kanto starter's final stage, Dragon-typed and blue-black, its flame burning hot enough to be invisible against a night sky. This one's a special pull.",
+    acceptedAnswers: ["mega charizard x", "mega charizard", "charizard x"],
+  }),
+  chase({
+    id: "lunala-rainbow-rare-gx",
+    name: "Lunala (Rainbow Rare GX)",
+    hintText:
+      "Psychic/Ghost Legendary, said to be able to travel between dimensions by tearing open a wormhole with the crescent shape on its chest.",
+    acceptedAnswers: ["lunala"],
   }),
 ];
 
