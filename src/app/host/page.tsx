@@ -6,6 +6,7 @@ import { PixelPanel } from "@/components/PixelPanel";
 import { PixelButton } from "@/components/PixelButton";
 import { QrCode } from "@/components/QrCode";
 import { usePoll } from "@/hooks/usePoll";
+import { useOrigin } from "@/hooks/useOrigin";
 
 type TeamStatus = "unclaimed" | "guessing" | "awaiting_handoff" | "finished";
 
@@ -50,9 +51,7 @@ export default function HostPage() {
   const { data: teams, refetch } = usePoll<HostTeamView[]>(fetchHostState, 2000);
   const [now, setNow] = useState(() => Date.now());
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
-  const [joinUrl] = useState(() =>
-    typeof window !== "undefined" ? window.location.origin : ""
-  );
+  const joinUrl = useOrigin();
   const [resetOpen, setResetOpen] = useState(false);
 
   useEffect(() => {
