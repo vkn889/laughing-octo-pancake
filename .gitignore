@@ -33,6 +33,11 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 !.env.example
+# Safe to commit: Supabase anon/publishable key, meant to be public and
+# scoped by Row Level Security (see src/lib/storage/supabaseBackend.ts).
+# Lets the Vercel GitHub integration build with Supabase configured
+# without a manual dashboard env var step.
+!.env.production
 
 # vercel
 .vercel

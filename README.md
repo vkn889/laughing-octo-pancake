@@ -52,21 +52,34 @@ point phones at the right address.
 
 Vercel's functions are stateless and don't share a filesystem across
 invocations, so the JSON file above only works for Option A. On Vercel,
-the app automatically switches to a Supabase-backed store instead. No
-code changes needed, just point it at a Supabase project:
+the app automatically switches to a Supabase-backed store instead.
 
-1. A dedicated project (`pokemon-scavenger-hunt`, org `vkn889's Org`) has
-   already been created and migrated, see
-   `supabase/migrations/20260807221900_create_teams_table.sql` for the
-   schema (a `teams` table, seeded with the 7-team roster, with Row Level
-   Security scoping the app's anon key to read/update only).
-2. Push this repo to GitHub (or run `vercel` from the CLI) and import it
-   as a new Vercel project.
-3. In the project's **Settings -> Environment Variables**, set
-   `SUPABASE_URL` and `SUPABASE_ANON_KEY` (Supabase project ->
-   Settings -> API). See `.env.example`.
-4. Deploy. Every clue guess, handoff confirmation, and the host dashboard
-   now read/write through Supabase instead of a local file.
+This is already wired up and live:
+
+- A dedicated Supabase project (`pokemon-scavenger-hunt`, org `vkn889's
+  Org`) has been created and migrated, see
+  `supabase/migrations/20260807221900_create_teams_table.sql` for the
+  schema (a `teams` table, seeded with the 7-team roster, with Row Level
+  Security scoping the app's anon key to read/update only).
+- This repo's `origin` remote (`github.com/vkn889/laughing-octo-pancake`)
+  is connected to a Vercel project via its GitHub integration, which
+  auto-deploys on every push. `git push` is all that's needed.
+- `.env.production` (committed, not gitignored) carries `SUPABASE_URL`
+  and the Supabase **anon/publishable** key, so the Vercel build picks up
+  Supabase config with no manual dashboard step. This is intentional, not
+  an oversight: the anon key is meant to be public (it's what client-side
+  Supabase apps ship in their JS bundle everywhere) and is safe to expose
+  because Row Level Security is what actually gates access, not key
+  secrecy, see the RLS policies in the migration above. The
+  `service_role` key (which *would* need to stay secret) is never used
+  anywhere in this app.
+
+Setting up your own Supabase project from scratch, or preferring Vercel's
+dashboard env vars over the committed file? Run the migration SQL against
+your project (SQL Editor, or `supabase db push`), then either set
+`SUPABASE_URL`/`SUPABASE_ANON_KEY` in **Settings -> Environment
+Variables** (which takes precedence over `.env.production`) or edit that
+file directly.
 
 Setting up your own Supabase project from scratch instead? Run the SQL in
 `supabase/migrations/20260807221900_create_teams_table.sql` against it
