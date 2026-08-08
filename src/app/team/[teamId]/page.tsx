@@ -9,12 +9,12 @@ import { Confetti } from "@/components/Confetti";
 import { MusicToggle } from "@/components/MusicToggle";
 import { usePoll } from "@/hooks/usePoll";
 import { useElapsed, formatDuration } from "@/hooks/useElapsed";
-import { playCry, playRevealChime, playWrongBlip } from "@/lib/chiptune";
+import { playRevealChime, playWrongBlip } from "@/lib/chiptune";
 
 const STORAGE_KEY = "pokemon-hunt-team-id";
 
 type TeamStatus = "unclaimed" | "guessing" | "awaiting_handoff" | "finished";
-type CardRarity = "normal" | "legendary";
+type CardRarity = "normal" | "legendary" | "chase";
 
 type PlayerTeamView = {
   teamId: string;
@@ -26,7 +26,6 @@ type PlayerTeamView = {
   score: number;
   hintText: string | null;
   hintImage: string | null;
-  hintAudioSeed: string | null;
   hintPoints: number | null;
   hintRarity: CardRarity | null;
   wrongGuesses: number;
@@ -148,14 +147,24 @@ export default function TeamPage() {
   );
 }
 
+const RARITY_STYLE: Record<CardRarity, string> = {
+  normal: "bg-pokedex-blue",
+  legendary: "bg-pokedex-red",
+  chase: "bg-gradient-to-r from-amber-500 to-fuchsia-600",
+};
+const RARITY_LABEL: Record<CardRarity, string> = {
+  normal: "",
+  legendary: "⭐ LEGENDARY · ",
+  chase: "🌟 CHASE CARD · ",
+};
+
 function RarityBadge({ points, rarity }: { points: number; rarity: CardRarity }) {
   return (
     <span
-      className={`font-pixel text-[8px] px-2 py-1 rounded inline-block text-white shrink-0 ${
-        rarity === "legendary" ? "bg-pokedex-red" : "bg-pokedex-blue"
-      }`}
+      className={`font-pixel text-[8px] px-2 py-1 rounded inline-block text-white shrink-0 ${RARITY_STYLE[rarity]}`}
     >
-      {rarity === "legendary" ? `⭐ LEGENDARY · ${points} pts` : `${points} pts`}
+      {RARITY_LABEL[rarity]}
+      {points} pts
     </span>
   );
 }
@@ -203,22 +212,6 @@ function GuessingScreen({
               e.currentTarget.closest("div")!.style.display = "none";
             }}
           />
-        </div>
-      )}
-
-      {!team.hintImage && team.hintAudioSeed && (
-        <div className="pixel-panel bg-white p-4 flex flex-col items-center gap-2">
-          <p className="font-pixel text-[8px] text-pokedex-ink/60 text-center leading-relaxed">
-            This one&apos;s already evolved, no silhouette. Listen instead:
-          </p>
-          <PixelButton
-            type="button"
-            tone="blue"
-            className="px-4 py-3 min-h-11 text-[10px]"
-            onClick={() => playCry(team.hintAudioSeed!)}
-          >
-            🔊 Play Cry
-          </PixelButton>
         </div>
       )}
 

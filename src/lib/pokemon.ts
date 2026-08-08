@@ -9,12 +9,12 @@
 // Company's copyrighted game text) and not invented fluff either. The
 // name is never stated outright, so it still works as a guessing clue.
 //
-// Rarity/points: normal card = 5, legendary/mythical = 15. A team's
-// running score is just the sum of points for every card they've caught
-// (see computeScore in store.ts) — finding more stages of one line adds
-// up naturally (2 stages = 10, 3 stages = 15), no separate multiplier
-// logic needed. Rayquaza (100 pts) is intentionally not in this roster
-// yet, per instructions — add it later as its own "legendary" entry.
+// Rarity/points: normal card = 5, legendary/mythical = 15, chase = 100
+// (currently just Mega Rayquaza — the flagship card of this round). A
+// team's running score is just the sum of points for every card they've
+// caught (see computeScore in store.ts) — finding more stages of one
+// line adds up naturally (2 stages = 10, 3 stages = 15), no separate
+// multiplier logic needed.
 //
 // isBasicStage drives the clue screen: true shows the classic silhouette
 // image; false hides the image entirely and offers a "Play Cry" button
@@ -33,7 +33,7 @@
 // for basic-stage entries only, and always shows it in full color once a
 // team guesses correctly.
 
-export type CardRarity = "normal" | "legendary";
+export type CardRarity = "normal" | "legendary" | "chase";
 
 export type PokemonClue = {
   id: string;
@@ -102,6 +102,23 @@ function legendary(
     image: fields.image ?? `/pokemon/${fields.id}.png`,
     rarity: "legendary",
     points: 15,
+    hidingSpot: nextSpot(),
+  };
+}
+
+/** The single flagship "chase card" of this round — Mega Rayquaza. */
+function chase(
+  fields: Omit<PokemonClue, "rarity" | "points" | "hidingSpot" | "image" | "lineId" | "isBasicStage"> & {
+    image?: string;
+  }
+): PokemonClue {
+  return {
+    ...fields,
+    lineId: null,
+    isBasicStage: false,
+    image: fields.image ?? `/pokemon/${fields.id}.png`,
+    rarity: "chase",
+    points: 100,
     hidingSpot: nextSpot(),
   };
 }
@@ -618,6 +635,15 @@ export const POKEMON: PokemonClue[] = [
     hintText:
       "Steel/Dragon Legendary said to control the flow of time itself, with a body said to resemble a diamond.",
     acceptedAnswers: ["dialga"],
+  }),
+
+  // --- Chase card (100 pts, the flagship pull of this round) ---
+  chase({
+    id: "mega-rayquaza",
+    name: "Mega Rayquaza",
+    hintText:
+      "Dragon/Flying Legendary, said to have lived for hundreds of millions of years in the ozone layer. Mega Evolves without a stone, through sheer force of will alone, into a form with no visible limbs at all, just an endless coiled body.",
+    acceptedAnswers: ["mega rayquaza", "rayquaza"],
   }),
 ];
 

@@ -52,60 +52,56 @@ export function playWrongBlip() {
   tone(audioCtx, 311, now + 0.08, 0.14, 0.12, "sawtooth");
 }
 
-/**
- * Generic creature "cry" stand-in for non-basic-stage Pokémon (SRD-adjacent
- * new rule: only basic-stage cards get a silhouette, everything else gets
- * this button instead of an image). Pitch is derived from `seed` so the
- * same card always sounds the same without revealing anything — it's a
- * hash, not the name.
- */
-export function playCry(seed: string) {
-  const audioCtx = getCtx();
-  if (!audioCtx) return;
-  let hash = 0;
-  for (const ch of seed) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
-  const base = 300 + (hash % 500);
-  const now = audioCtx.currentTime;
-  const osc = audioCtx.createOscillator();
-  const gainNode = audioCtx.createGain();
-  osc.type = "square";
-  osc.frequency.setValueAtTime(base, now);
-  osc.frequency.exponentialRampToValueAtTime(base * 1.6, now + 0.08);
-  osc.frequency.exponentialRampToValueAtTime(base * 0.7, now + 0.22);
-  gainNode.gain.setValueAtTime(0.18, now);
-  gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.26);
-  osc.connect(gainNode).connect(audioCtx.destination);
-  osc.start(now);
-  osc.stop(now + 0.28);
-}
+// --- Looping tracks (opt-in via a mute button; browsers block autoplay
+// audio without a user gesture anyway). Two original melodies, picked by
+// which screen is showing: an upbeat one for the title screen, a calmer
+// one for the actual hunt. Neither is sampled from anywhere.
 
-// --- Background loop (opt-in via a mute button; browsers block autoplay
-// audio without a user gesture anyway) -------------------------------
+const TRACKS = {
+  title: [392.0, 440.0, 493.88, 587.33, 493.88, 440.0, 493.88, 587.33, 659.25, 587.33, 493.88, 440.0],
+  game: [523.25, 587.33, 659.25, 783.99, 659.25, 587.33, 523.25, 392.0],
+} as const;
+export type Track = keyof typeof TRACKS;
 
-const MELODY = [523.25, 587.33, 659.25, 783.99, 659.25, 587.33, 523.25, 392.0]; // original walk, not from any game
-let musicPlaying = false;
+let currentTrack: Track | null = null;
 let musicTimer: ReturnType<typeof setTimeout> | null = null;
 
-function scheduleStep(audioCtx: AudioContext, i: number) {
-  if (!musicPlaying) return;
+function scheduleStep(audioCtx: AudioContext, track: Track, i: number) {
+  if (currentTrack !== track) return;
   const now = audioCtx.currentTime;
-  tone(audioCtx, MELODY[i % MELODY.length], now, 0.28, 0.05, "triangle");
-  musicTimer = setTimeout(() => scheduleStep(audioCtx, i + 1), 320);
+  const notes = TRACKS[track];
+  tone(audioCtx, notes[i % notes.length], now, 0.28, 0.05, "triangle");
+  musicTimer = setTimeout(() => scheduleStep(audioCtx, track, i + 1), 320);
 }
 
-export function toggleBackgroundMusic(): boolean {
+/** Starts (or restarts, if a different track is already playing) a loop. */
+export function playTrack(track: Track) {
   const audioCtx = getCtx();
-  if (!audioCtx) return false;
-  if (musicPlaying) {
-    musicPlaying = false;
-    if (musicTimer) clearTimeout(musicTimer);
+  if (!audioCtx) return;
+  if (musicTimer) clearTimeout(musicTimer);
+  currentTrack = track;
+  scheduleStep(audioCtx, track, 0);
+}
+
+export function stopMusic() {
+  currentTrack = null;
+  if (musicTimer) clearTimeout(musicTimer);
+}
+
+/** Toggle helper for a single-track player (e.g. the in-hunt screens). */
+export function toggleTrack(track: Track): boolean {
+  if (currentTrack === track) {
+    stopMusic();
     return false;
   }
-  musicPlaying = true;
-  scheduleStep(audioCtx, 0);
+  playTrack(track);
   return true;
 }
 
 export function isMusicPlaying(): boolean {
-  return musicPlaying;
+  return currentTrack !== null;
+}
+
+export function currentTrackName(): Track | null {
+  return currentTrack;
 }

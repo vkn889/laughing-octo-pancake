@@ -122,11 +122,8 @@ export type PlayerTeamView = {
   totalClues: number; // full roster size, for "N of 53" context
   score: number;
   hintText: string | null;
-  /** Silhouette hint image — only set for basic-stage cards. */
+  /** Silhouette hint image, shown for every card while guessing. */
   hintImage: string | null;
-  /** Non-basic-stage cards get a "Play Cry" button instead of an image;
-   *  this seeds its (synthesized, non-real-cry) pitch. */
-  hintAudioSeed: string | null;
   hintPoints: number | null;
   hintRarity: CardRarity | null;
   wrongGuesses: number;
@@ -165,8 +162,7 @@ function toPlayerView(team: TeamState, config: TeamConfig): PlayerTeamView {
     totalClues: TOTAL_CLUES,
     score: computeScore(team),
     hintText: showClue ? currentPokemon!.hintText : null,
-    hintImage: showClue && currentPokemon!.isBasicStage ? currentPokemon!.image : null,
-    hintAudioSeed: showClue && !currentPokemon!.isBasicStage ? currentPokemon!.id : null,
+    hintImage: showClue ? currentPokemon!.image : null,
     hintPoints: showClue ? currentPokemon!.points : null,
     hintRarity: showClue ? currentPokemon!.rarity : null,
     wrongGuesses: team.wrongGuesses,

@@ -11,7 +11,7 @@ import { useOrigin } from "@/hooks/useOrigin";
 import { POKEMON } from "@/lib/pokemon";
 
 type TeamStatus = "unclaimed" | "guessing" | "awaiting_handoff" | "finished";
-type CardRarity = "normal" | "legendary";
+type CardRarity = "normal" | "legendary" | "chase";
 
 type HostTeamView = {
   teamId: string;
