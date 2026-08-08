@@ -8,7 +8,7 @@ Rayquaza, Froakie → Frogadier → Greninja.
 
 ## How it works
 
-- 7 fixed teams (Team Red / Blue / Yellow / Green / Orange / Purple / Pink)
+- 7 fixed teams (Team Alpha / Magma / Aqua / Ball / Pegasus / Touch / Doom)
   each claim a spot on `/` from their own phone.
 - Each team gets a random order of the 7 Pokémon, one clue at a time. A
   correct guess (typo-tolerant) locks them into "bring the card to the
