@@ -23,14 +23,21 @@ export type { TeamState, TeamStatus };
 const TOTAL_CLUES = POKEMON.length;
 const ALL_TEAM_IDS = TEAMS.map((t) => t.id);
 
+/** A team can't be assigned a "chase" card until their score hits this. */
+export const CHASE_UNLOCK_SCORE = 25;
+
 /**
  * Picks a random still-available card for `forTeamId`. "Available" means
  * not yet caught by any team; a card another team currently has as their
  * active clue is avoided where possible too (so two teams don't usually
  * end up chasing the same not-yet-caught card), but falls back to
  * allowing that overlap once the pool gets small enough that avoiding it
- * entirely isn't possible. Returns null once the whole 53-card roster has
- * been caught across all teams.
+ * entirely isn't possible. Chase-rarity cards are excluded until the team
+ * has CHASE_UNLOCK_SCORE points, unless every other still-available card
+ * has already been caught or is spoken for — a team shouldn't be stuck
+ * "finished" below the threshold just because chase cards are all that's
+ * technically left in the shared pool. Returns null once nothing is left
+ * for this team at all.
  */
 function pickNextCard(allTeams: TeamState[], forTeamId: string): string | null {
   const caughtGlobally = new Set(allTeams.flatMap((t) => t.caughtIds));
@@ -48,12 +55,21 @@ function pickNextCard(allTeams: TeamState[], forTeamId: string): string | null {
       .map((t) => t.currentCardId as string)
   );
 
-  const uncontested = POKEMON.filter(
-    (p) => !caughtGlobally.has(p.id) && !inProgressElsewhere.has(p.id)
-  );
-  const pool = uncontested.length > 0
-    ? uncontested
-    : POKEMON.filter((p) => !caughtGlobally.has(p.id));
+  const forTeam = allTeams.find((t) => t.teamId === forTeamId);
+  const chaseUnlocked = forTeam ? computeScore(forTeam) >= CHASE_UNLOCK_SCORE : false;
+
+  function poolFor(allowChase: boolean) {
+    const eligible = POKEMON.filter((p) => allowChase || p.rarity !== "chase");
+    const uncontested = eligible.filter(
+      (p) => !caughtGlobally.has(p.id) && !inProgressElsewhere.has(p.id)
+    );
+    return uncontested.length > 0
+      ? uncontested
+      : eligible.filter((p) => !caughtGlobally.has(p.id));
+  }
+
+  let pool = poolFor(chaseUnlocked);
+  if (pool.length === 0 && !chaseUnlocked) pool = poolFor(true);
 
   if (pool.length === 0) return null;
   return pool[Math.floor(Math.random() * pool.length)].id;
