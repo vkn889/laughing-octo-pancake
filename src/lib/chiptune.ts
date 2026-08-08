@@ -52,13 +52,11 @@ export function playWrongBlip() {
   tone(audioCtx, 311, now + 0.08, 0.14, 0.12, "sawtooth");
 }
 
-// --- Looping tracks (opt-in via a mute button; browsers block autoplay
-// audio without a user gesture anyway). Two original melodies, picked by
-// which screen is showing: an upbeat one for the title screen, a calmer
-// one for the actual hunt. Neither is sampled from anywhere.
+// --- Looping background track (opt-in via a mute button; browsers block
+// autoplay audio without a user gesture anyway). An original melody, not
+// sampled from anywhere.
 
 const TRACKS = {
-  title: [392.0, 440.0, 493.88, 587.33, 493.88, 440.0, 493.88, 587.33, 659.25, 587.33, 493.88, 440.0],
   game: [523.25, 587.33, 659.25, 783.99, 659.25, 587.33, 523.25, 392.0],
 } as const;
 export type Track = keyof typeof TRACKS;
