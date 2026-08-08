@@ -9,7 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@upstash/redis": "^1.38.2",
+    "@supabase/supabase-js": "^2.112.2",
     "canvas-confetti": "^1.9.4",
     "next": "16.3.0",
     "qrcode": "^1.5.4",

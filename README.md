@@ -52,21 +52,25 @@ point phones at the right address.
 
 Vercel's functions are stateless and don't share a filesystem across
 invocations, so the JSON file above only works for Option A. On Vercel,
-the app automatically switches to a Redis-backed store instead. No code
-changes needed, just connect a database:
+the app automatically switches to a Supabase-backed store instead. No
+code changes needed, just point it at a Supabase project:
 
-1. Push this repo to GitHub (or run `vercel` from the CLI) and import it
+1. A dedicated project (`pokemon-scavenger-hunt`, org `vkn889's Org`) has
+   already been created and migrated, see
+   `supabase/migrations/20260807221900_create_teams_table.sql` for the
+   schema (a `teams` table, seeded with the 7-team roster, with Row Level
+   Security scoping the app's anon key to read/update only).
+2. Push this repo to GitHub (or run `vercel` from the CLI) and import it
    as a new Vercel project.
-2. In the project's **Storage** tab, click **Connect Database** and add a
-   Redis store (Vercel's marketplace integration, powered by Upstash).
-   This injects `KV_REST_API_URL` / `KV_REST_API_TOKEN` into your
-   project's environment automatically, nothing to copy by hand.
-3. Deploy. That's it, every clue guess, handoff confirmation, and the
-   host dashboard all read/write through Redis instead of a local file.
+3. In the project's **Settings -> Environment Variables**, set
+   `SUPABASE_URL` and `SUPABASE_ANON_KEY` (Supabase project ->
+   Settings -> API). See `.env.example`.
+4. Deploy. Every clue guess, handoff confirmation, and the host dashboard
+   now read/write through Supabase instead of a local file.
 
-Prefer to wire up storage yourself? Any Upstash Redis database works: set
-`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (from the Upstash
-console) as project environment variables instead. See `.env.example`.
+Setting up your own Supabase project from scratch instead? Run the SQL in
+`supabase/migrations/20260807221900_create_teams_table.sql` against it
+(SQL Editor, or `supabase db push`), then use that project's URL/anon key.
 
 ## Before the real party, edit the content
 
@@ -96,7 +100,8 @@ look) so they hint at shape without spoiling color/name.
 Next.js App Router + TypeScript + Tailwind v4. Route Handlers under
 `src/app/api/**` are the "backend"; `src/lib/store.ts` is the shared-state
 API, backed by `src/lib/storage/fileBackend.ts` (local JSON file, guarded
-by an in-process mutex) or `src/lib/storage/redisBackend.ts` (Upstash
-Redis, using an atomic Lua script so simultaneous team claims still
-resolve to exactly one winner across serverless instances). No other
-external services required.
+by an in-process mutex) or `src/lib/storage/supabaseBackend.ts` (Postgres
+via `@supabase/supabase-js`, using an atomic conditional `UPDATE ... WHERE
+status = 'unclaimed'` so simultaneous team claims still resolve to exactly
+one winner across serverless instances). No other external services
+required.
