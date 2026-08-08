@@ -1,12 +1,12 @@
 import type { Metadata, Viewport } from "next";
-import { Geist_Mono } from "next/font/google";
-import localFont from "next/font/local";
+import { Geist_Mono, Press_Start_2P } from "next/font/google";
 import "./globals.css";
 
-// Self-hosted so the pixel font works even without internet at the venue
-// (SRD 2.6: pixel/monospace retro font for headers).
-const pixelFont = localFont({
-  src: "../fonts/PressStart2P-Regular.ttf",
+// Fetched once at build time and self-hosted as a static asset from then
+// on (SRD 2.6: pixel/monospace retro font for headers); only the machine
+// running `npm run build` needs internet, not the party venue.
+const pixelFont = Press_Start_2P({
+  weight: "400",
   variable: "--font-pixel",
   display: "swap",
 });
