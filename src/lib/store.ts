@@ -4,7 +4,7 @@
 // or Redis on Vercel; see src/lib/storage/index.ts for how the backend is
 // chosen, and README for how to connect one on Vercel.
 
-import { POKEMON, POKEMON_BY_ID, type PokemonClue } from "./pokemon";
+import { POKEMON, POKEMON_BY_ID, type CardRarity, type PokemonClue } from "./pokemon";
 import { TEAMS, TEAM_BY_ID, type TeamConfig } from "./teams";
 import { isGuessCorrect } from "./match";
 import {
@@ -28,6 +28,21 @@ function shuffle<T>(items: T[]): T[] {
   return arr;
 }
 
+/**
+ * Sum of points for every card a team has already caught (indices before
+ * currentIndex — currentIndex only advances once the host confirms a
+ * handoff). Finding more stages of one line adds up naturally: 2 stages
+ * = 10, a complete 3-stage line = 15, no separate multiplier needed.
+ */
+function computeScore(team: TeamState): number {
+  let total = 0;
+  for (let i = 0; i < team.currentIndex; i++) {
+    const pokemon = POKEMON_BY_ID[team.clueOrder[i]];
+    if (pokemon) total += pokemon.points;
+  }
+  return total;
+}
+
 // --- Public shapes returned to clients ----------------------------------
 
 export type PublicTeamSummary = {
@@ -44,9 +59,22 @@ export type PlayerTeamView = {
   status: TeamStatus;
   currentClueNumber: number; // 1-indexed, for display
   totalClues: number;
+  score: number;
   hintText: string | null;
+  /** Silhouette hint image — only set for basic-stage cards. */
   hintImage: string | null;
+  /** Non-basic-stage cards get a "Play Cry" button instead of an image;
+   *  this seeds its (synthesized, non-real-cry) pitch. */
+  hintAudioSeed: string | null;
+  hintPoints: number | null;
+  hintRarity: CardRarity | null;
   wrongGuesses: number;
+  /** Set only right after a correct guess (status "awaiting_handoff"):
+   *  the full-color reveal, shown instead of the silhouette. */
+  revealImage: string | null;
+  revealName: string | null;
+  revealPoints: number | null;
+  revealRarity: CardRarity | null;
   startTime: number | null;
   finishTime: number | null;
 };
@@ -54,8 +82,11 @@ export type PlayerTeamView = {
 export type HostTeamView = TeamState & {
   teamName: string;
   color: string;
+  score: number;
   currentPokemonName: string | null;
   currentHidingSpot: string | null;
+  currentPoints: number | null;
+  currentRarity: CardRarity | null;
 };
 
 function toPlayerView(team: TeamState, config: TeamConfig): PlayerTeamView {
@@ -65,6 +96,7 @@ function toPlayerView(team: TeamState, config: TeamConfig): PlayerTeamView {
     : undefined;
 
   const showClue = team.status === "guessing" && currentPokemon;
+  const showReveal = team.status === "awaiting_handoff" && currentPokemon;
 
   return {
     teamId: team.teamId,
@@ -73,9 +105,17 @@ function toPlayerView(team: TeamState, config: TeamConfig): PlayerTeamView {
     status: team.status,
     currentClueNumber: Math.min(team.currentIndex + 1, TOTAL_CLUES),
     totalClues: TOTAL_CLUES,
+    score: computeScore(team),
     hintText: showClue ? currentPokemon!.hintText : null,
-    hintImage: showClue ? currentPokemon!.image : null,
+    hintImage: showClue && currentPokemon!.isBasicStage ? currentPokemon!.image : null,
+    hintAudioSeed: showClue && !currentPokemon!.isBasicStage ? currentPokemon!.id : null,
+    hintPoints: showClue ? currentPokemon!.points : null,
+    hintRarity: showClue ? currentPokemon!.rarity : null,
     wrongGuesses: team.wrongGuesses,
+    revealImage: showReveal ? currentPokemon!.image : null,
+    revealName: showReveal ? currentPokemon!.name : null,
+    revealPoints: showReveal ? currentPokemon!.points : null,
+    revealRarity: showReveal ? currentPokemon!.rarity : null,
     startTime: team.startTime,
     finishTime: team.finishTime,
   };
@@ -88,8 +128,11 @@ function toHostView(team: TeamState, config: TeamConfig): HostTeamView {
     ...team,
     teamName: config.name,
     color: config.color,
+    score: computeScore(team),
     currentPokemonName: currentPokemon?.name ?? null,
     currentHidingSpot: currentPokemon?.hidingSpot ?? null,
+    currentPoints: currentPokemon?.points ?? null,
+    currentRarity: currentPokemon?.rarity ?? null,
   };
 }
 

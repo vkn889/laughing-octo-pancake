@@ -6,12 +6,15 @@ import { RetroHeader } from "@/components/RetroHeader";
 import { PixelPanel } from "@/components/PixelPanel";
 import { PixelButton } from "@/components/PixelButton";
 import { Confetti } from "@/components/Confetti";
+import { MusicToggle } from "@/components/MusicToggle";
 import { usePoll } from "@/hooks/usePoll";
 import { useElapsed, formatDuration } from "@/hooks/useElapsed";
+import { playCry, playRevealChime, playWrongBlip } from "@/lib/chiptune";
 
 const STORAGE_KEY = "pokemon-hunt-team-id";
 
 type TeamStatus = "unclaimed" | "guessing" | "awaiting_handoff" | "finished";
+type CardRarity = "normal" | "legendary";
 
 type PlayerTeamView = {
   teamId: string;
@@ -20,9 +23,17 @@ type PlayerTeamView = {
   status: TeamStatus;
   currentClueNumber: number;
   totalClues: number;
+  score: number;
   hintText: string | null;
   hintImage: string | null;
+  hintAudioSeed: string | null;
+  hintPoints: number | null;
+  hintRarity: CardRarity | null;
   wrongGuesses: number;
+  revealImage: string | null;
+  revealName: string | null;
+  revealPoints: number | null;
+  revealRarity: CardRarity | null;
   startTime: number | null;
   finishTime: number | null;
 };
@@ -74,7 +85,12 @@ export default function TeamPage() {
       });
       const json = await res.json();
       if (res.ok) {
-        if (!json.correct) setWrongFlash(true);
+        if (json.correct) {
+          playRevealChime();
+        } else {
+          playWrongBlip();
+          setWrongFlash(true);
+        }
         setGuess("");
         await refetch();
       }
@@ -96,14 +112,19 @@ export default function TeamPage() {
   return (
     <main className="flex-1 flex flex-col items-center justify-center gap-4 p-4 sm:p-6">
       <div className="w-full max-w-md flex flex-col gap-4">
-        <RetroHeader
-          title={team.teamName}
-          subtitle={
-            team.status === "finished"
-              ? "Hunt Complete!"
-              : `Clue ${team.currentClueNumber} of ${team.totalClues}`
-          }
-        />
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <RetroHeader
+              title={team.teamName}
+              subtitle={
+                team.status === "finished"
+                  ? `Hunt Complete! · ${team.score} pts`
+                  : `Clue ${team.currentClueNumber} of ${team.totalClues} · ${team.score} pts`
+              }
+            />
+          </div>
+          <MusicToggle />
+        </div>
 
         {team.status === "guessing" && (
           <GuessingScreen
@@ -117,13 +138,25 @@ export default function TeamPage() {
           />
         )}
 
-        {team.status === "awaiting_handoff" && <AwaitingHandoffScreen />}
+        {team.status === "awaiting_handoff" && <AwaitingHandoffScreen team={team} />}
 
         {team.status === "finished" && (
-          <FinishedScreen elapsedMs={elapsed} />
+          <FinishedScreen elapsedMs={elapsed} score={team.score} />
         )}
       </div>
     </main>
+  );
+}
+
+function RarityBadge({ points, rarity }: { points: number; rarity: CardRarity }) {
+  return (
+    <span
+      className={`font-pixel text-[8px] px-2 py-1 rounded inline-block text-white shrink-0 ${
+        rarity === "legendary" ? "bg-pokedex-red" : "bg-pokedex-blue"
+      }`}
+    >
+      {rarity === "legendary" ? `⭐ LEGENDARY · ${points} pts` : `${points} pts`}
+    </span>
   );
 }
 
@@ -146,11 +179,16 @@ function GuessingScreen({
 }) {
   return (
     <PixelPanel tone="screen" className="p-4 flex flex-col gap-4">
-      {elapsedLabel && (
-        <p className="font-pixel text-[9px] text-pokedex-ink/70 text-right">
-          ⏱ {elapsedLabel}
-        </p>
-      )}
+      <div className="flex items-center justify-between gap-2">
+        {team.hintPoints !== null && team.hintRarity !== null && (
+          <RarityBadge points={team.hintPoints} rarity={team.hintRarity} />
+        )}
+        {elapsedLabel && (
+          <p className="font-pixel text-[9px] text-pokedex-ink/70 ml-auto">
+            ⏱ {elapsedLabel}
+          </p>
+        )}
+      </div>
 
       {team.hintImage && (
         <div className="pixel-panel bg-white p-3 flex items-center justify-center">
@@ -165,6 +203,22 @@ function GuessingScreen({
               e.currentTarget.closest("div")!.style.display = "none";
             }}
           />
+        </div>
+      )}
+
+      {!team.hintImage && team.hintAudioSeed && (
+        <div className="pixel-panel bg-white p-4 flex flex-col items-center gap-2">
+          <p className="font-pixel text-[8px] text-pokedex-ink/60 text-center leading-relaxed">
+            This one&apos;s already evolved, no silhouette. Listen instead:
+          </p>
+          <PixelButton
+            type="button"
+            tone="blue"
+            className="px-4 py-3 min-h-11 text-[10px]"
+            onClick={() => playCry(team.hintAudioSeed!)}
+          >
+            🔊 Play Cry
+          </PixelButton>
         </div>
       )}
 
@@ -202,10 +256,31 @@ function GuessingScreen({
   );
 }
 
-function AwaitingHandoffScreen() {
+function AwaitingHandoffScreen({ team }: { team: PlayerTeamView }) {
   return (
     <PixelPanel tone="screen" className="p-6 flex flex-col items-center gap-4 text-center">
-      <p className="font-pixel text-3xl">📇</p>
+      {team.revealImage && (
+        <div className="pixel-panel bg-white p-3 flex items-center justify-center">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={team.revealImage}
+            alt={team.revealName ?? "Caught Pokémon"}
+            className="h-32 w-32 object-contain"
+            style={{ imageRendering: "pixelated" }}
+            onError={(e) => {
+              e.currentTarget.closest("div")!.style.display = "none";
+            }}
+          />
+        </div>
+      )}
+      {team.revealName && (
+        <p className="font-pixel text-sm leading-relaxed text-pokedex-ink">
+          It&apos;s {team.revealName}!
+        </p>
+      )}
+      {team.revealPoints !== null && team.revealRarity !== null && (
+        <RarityBadge points={team.revealPoints} rarity={team.revealRarity} />
+      )}
       <p className="font-pixel text-[12px] leading-loose text-pokedex-ink">
         Found it? Bring the card to the host!
       </p>
@@ -216,7 +291,13 @@ function AwaitingHandoffScreen() {
   );
 }
 
-function FinishedScreen({ elapsedMs }: { elapsedMs: number | null }) {
+function FinishedScreen({
+  elapsedMs,
+  score,
+}: {
+  elapsedMs: number | null;
+  score: number;
+}) {
   return (
     <PixelPanel tone="screen" className="p-6 flex flex-col items-center gap-4 text-center">
       <Confetti />
@@ -224,6 +305,7 @@ function FinishedScreen({ elapsedMs }: { elapsedMs: number | null }) {
       <p className="font-pixel text-sm leading-loose text-pokedex-ink">
         You caught &apos;em all!
       </p>
+      <p className="font-pixel text-[13px] text-pokedex-ink">Final score: {score} pts</p>
       {elapsedMs !== null && (
         <p className="font-pixel text-[11px] text-pokedex-ink/80">
           Total time: {formatDuration(elapsedMs)}

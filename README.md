@@ -3,16 +3,43 @@
 A mobile-first, Pokédex-themed "Who's That Pokémon?" scavenger hunt for a
 birthday party. Built from the PRD/SRD in `pokemon-scavenger-hunt-prd-srd.md`.
 
-**Field-test roster (7 Pokémon):** Torchic → Combusken → Blaziken,
-Rayquaza, Froakie → Frogadier → Greninja.
+**Current roster: 53 cards**, matching an actual physical card collection
+(hence uneven evolutionary lines — some skip a stage, some are one card,
+Mewtwo appears as two separate card variants). See `src/lib/pokemon.ts`
+for the full list. Rayquaza (planned as a 100-point card) isn't in yet.
+
+> 53 clues per team is a long hunt. Worth deciding upfront whether every
+> team plays the whole roster, or you cut it down / set a time limit for
+> the actual party — the app doesn't enforce either, that's a host call.
 
 ## How it works
 
 - 7 fixed teams (Team Alpha / Magma / Aqua / Ball / Pegasus / Touch / Doom)
   each claim a spot on `/` from their own phone.
-- Each team gets a random order of the 7 Pokémon, one clue at a time. A
+- Each team gets a random order of the roster, one clue at a time. A
   correct guess (typo-tolerant) locks them into "bring the card to the
   host" until the host taps **Confirm** for that team on `/host`.
+- **Rarity & scoring:** each card is worth 5 points ("normal") or 15
+  ("legendary" — Mew, Mewtwo x2, Arceus, Dialga for now). A team's score
+  is just the sum of points for everything they've caught; finding more
+  stages of one line adds up on its own (2 stages = 10, a complete line =
+  15), no separate bonus logic. Shown on the clue screen, the reveal
+  screen, and as a live-sorted leaderboard on `/host`.
+- **Silhouette vs. cry:** only basic-stage cards (the first form of a
+  line, e.g. Charmander, Bulbasaur, Torchic) show the black silhouette
+  hint image. Every other card (evolved forms, legendaries) shows no
+  image during guessing — just a "Play Cry" button — and reveals in full
+  color only once guessed correctly, on the "bring it to the host"
+  screen.
+- **Audio:** a music toggle (🔊/🔇) and all sound effects are original,
+  synthesized in-browser at runtime via the Web Audio API
+  (`src/lib/chiptune.ts`) — a reveal chime, a wrong-guess blip, the
+  "Play Cry" button, and a background loop. None of it is real Pokémon
+  game audio: that's copyrighted Nintendo/Game Freak/Creatures material,
+  not something to source and embed. If you want the actual games' music
+  or cries, that's audio you'd need to add yourself from something you
+  own the rights to use — drop files in `public/audio/` and wire them
+  into `src/lib/chiptune.ts`'s callers.
 - All state is shared, key-value storage read/written through
   `src/lib/store.ts`, which is backend-agnostic: it goes through whichever
   storage backend is active (`src/lib/storage/index.ts`), so the same code
@@ -75,31 +102,31 @@ This is already wired up and live:
   anywhere in this app.
 
 Setting up your own Supabase project from scratch, or preferring Vercel's
-dashboard env vars over the committed file? Run the migration SQL against
-your project (SQL Editor, or `supabase db push`), then either set
+dashboard env vars over the committed file? Run the migration SQL in
+`supabase/migrations/20260807221900_create_teams_table.sql` against your
+project (SQL Editor, or `supabase db push`), then either set
 `SUPABASE_URL`/`SUPABASE_ANON_KEY` in **Settings -> Environment
 Variables** (which takes precedence over `.env.production`) or edit that
 file directly.
-
-Setting up your own Supabase project from scratch instead? Run the SQL in
-`supabase/migrations/20260807221900_create_teams_table.sql` against it
-(SQL Editor, or `supabase db push`), then use that project's URL/anon key.
 
 ## Before the real party, edit the content
 
 Everything content-related lives in two files, no code changes needed:
 
-- **`src/lib/pokemon.ts`**: for each of the 7 Pokémon, `hintText` (riddle,
-  never say the name), `hidingSpot` (host-only reference, shown only on
-  `/host`), and `acceptedAnswers`. Swap `hidingSpot` for your real venue;
-  `hintText` is already built from real Pokédex facts (type,
-  classification, canonical traits) rather than made-up riddles.
+- **`src/lib/pokemon.ts`**: for each of the 53 cards, `hintText` (never
+  says the name), `hidingSpot` (host-only reference, shown only on
+  `/host`, currently placeholders like "Kitchen counter (EDIT ME #3)"),
+  and `acceptedAnswers`. With 53 hiding spots you'll want a real
+  spreadsheet while you're physically hiding cards, not just this file.
+  `points`/`rarity`/`isBasicStage`/`lineId` drive the scoring and
+  silhouette-vs-cry behavior described above; edit them if your actual
+  card collection differs from what's modeled here.
 - **`src/lib/teams.ts`**: team names/colors if you want something other
   than Alpha/Magma/Aqua/Ball/Pegasus/Touch/Doom.
 
-Hint images are the official artwork in `public/pokemon/*.png`, rendered as
-a black silhouette on the clue screen (classic "Who's That Pokémon?"
-look) so they hint at shape without spoiling color/name.
+Hint images are official artwork in `public/pokemon/*.png`, shown as a
+black silhouette (classic "Who's That Pokémon?" look) for basic-stage
+cards only, and in full color for every card once guessed correctly.
 
 ## Testing without a full party
 

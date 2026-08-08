@@ -5,10 +5,13 @@ import { RetroHeader } from "@/components/RetroHeader";
 import { PixelPanel } from "@/components/PixelPanel";
 import { PixelButton } from "@/components/PixelButton";
 import { QrCode } from "@/components/QrCode";
+import { MusicToggle } from "@/components/MusicToggle";
 import { usePoll } from "@/hooks/usePoll";
 import { useOrigin } from "@/hooks/useOrigin";
+import { POKEMON } from "@/lib/pokemon";
 
 type TeamStatus = "unclaimed" | "guessing" | "awaiting_handoff" | "finished";
+type CardRarity = "normal" | "legendary";
 
 type HostTeamView = {
   teamId: string;
@@ -20,8 +23,11 @@ type HostTeamView = {
   startTime: number | null;
   finishTime: number | null;
   wrongGuesses: number;
+  score: number;
   currentPokemonName: string | null;
   currentHidingSpot: string | null;
+  currentPoints: number | null;
+  currentRarity: CardRarity | null;
 };
 
 const STATUS_LABEL: Record<TeamStatus, string> = {
@@ -79,19 +85,28 @@ export default function HostPage() {
     await refetch();
   }
 
-  const totalClues = teams?.[0]?.clueOrder.length || 7;
+  const totalClues = teams?.[0]?.clueOrder.length || POKEMON.length;
+  // Sort by score for a live leaderboard feel, without reordering rows
+  // wildly while everyone's still at 0 (keeps roster order as a tiebreak).
+  const ranked = [...(teams ?? [])].sort((a, b) => b.score - a.score);
 
   return (
     <main className="flex-1 flex flex-col items-center gap-4 p-4 sm:p-6">
       <div className="w-full max-w-4xl flex flex-col gap-4">
-        <RetroHeader title="Host Dashboard" subtitle="Live team progress" />
+        <div className="flex items-center gap-2">
+          <div className="flex-1 min-w-0">
+            <RetroHeader title="Host Dashboard" subtitle="Live team progress" />
+          </div>
+          <MusicToggle />
+        </div>
 
         <div className="grid gap-4 sm:grid-cols-[1fr_auto]">
           <PixelPanel tone="screen" className="p-3 overflow-x-auto">
-            <table className="w-full text-left border-collapse min-w-[560px]">
+            <table className="w-full text-left border-collapse min-w-[620px]">
               <thead>
                 <tr className="font-pixel text-[9px] text-pokedex-ink/70">
                   <th className="p-2">Team</th>
+                  <th className="p-2">Score</th>
                   <th className="p-2">Clue</th>
                   <th className="p-2">Status</th>
                   <th className="p-2">Time</th>
@@ -100,7 +115,7 @@ export default function HostPage() {
                 </tr>
               </thead>
               <tbody>
-                {(teams ?? []).map((team) => (
+                {ranked.map((team) => (
                   <tr
                     key={team.teamId}
                     className="border-t-2 border-pokedex-ink/20 align-middle"
@@ -113,6 +128,7 @@ export default function HostPage() {
                         {team.teamName}
                       </span>
                     </td>
+                    <td className="p-2 font-pixel text-[10px]">{team.score}</td>
                     <td className="p-2 font-pixel text-[10px]">
                       {team.status === "unclaimed"
                         ? "-"
@@ -130,7 +146,9 @@ export default function HostPage() {
                       </span>
                       {team.status === "awaiting_handoff" && team.currentHidingSpot && (
                         <div className="text-pokedex-ink/50 mt-1 normal-case">
-                          {team.currentPokemonName} · {team.currentHidingSpot}
+                          {team.currentPokemonName}
+                          {team.currentRarity === "legendary" ? " ⭐" : ""} ({team.currentPoints}{" "}
+                          pts) · {team.currentHidingSpot}
                         </div>
                       )}
                     </td>
