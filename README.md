@@ -8,17 +8,28 @@ birthday party. Built from the PRD/SRD in `pokemon-scavenger-hunt-prd-srd.md`.
 Mewtwo appears as two separate card variants). See `src/lib/pokemon.ts`
 for the full list. Rayquaza (planned as a 100-point card) isn't in yet.
 
-> 53 clues per team is a long hunt. Worth deciding upfront whether every
-> team plays the whole roster, or you cut it down / set a time limit for
-> the actual party — the app doesn't enforce either, that's a host call.
+> With 7 teams sharing one 53-card pool (see below), the hunt ends itself
+> once the pool runs out — no need to set a time limit. How many cards
+> each team ends up with depends on how the draws fall, not a fixed split.
 
 ## How it works
 
 - 7 fixed teams (Team Alpha / Magma / Aqua / Ball / Pegasus / Touch / Doom)
   each claim a spot on `/` from their own phone.
-- Each team gets a random order of the roster, one clue at a time. A
-  correct guess (typo-tolerant) locks them into "bring the card to the
-  host" until the host taps **Confirm** for that team on `/host`.
+- **Shared card pool, not a fixed order per team:** there's one physical
+  copy of each of the 53 cards, so once any team catches one, it's gone
+  for everyone else. Each team is dynamically assigned a random
+  still-available card, one at a time; the moment any team confirms a
+  catch, every other team's pool of *possible* next cards shrinks by one.
+  If a team happens to be actively chasing a card another team catches
+  first, they get swapped onto a fresh one automatically, typically
+  within one poll cycle (~2s) — see `pickNextCard`/`reconcileTeam` in
+  `src/lib/store.ts` if you want the mechanics. A team is "finished" once
+  the shared pool has nothing left to assign them, not when they've
+  personally caught all 53 (with 7 teams pulling from one pool, nobody
+  will).
+- A correct guess (typo-tolerant) locks a team into "bring the card to
+  the host" until the host taps **Confirm** for that team on `/host`.
 - **Rarity & scoring:** each card is worth 5 points ("normal") or 15
   ("legendary" — Mew, Mewtwo x2, Arceus, Dialga for now). A team's score
   is just the sum of points for everything they've caught; finding more

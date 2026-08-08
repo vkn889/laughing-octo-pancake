@@ -43,8 +43,8 @@ function getClient(): SupabaseClient {
 type TeamRow = {
   team_id: string;
   status: TeamState["status"];
-  clue_order: string[];
-  current_index: number;
+  caught_ids: string[];
+  current_card_id: string | null;
   start_time: number | null;
   finish_time: number | null;
   wrong_guesses: number;
@@ -54,8 +54,8 @@ function rowToTeamState(row: TeamRow): TeamState {
   return {
     teamId: row.team_id,
     status: row.status,
-    clueOrder: row.clue_order,
-    currentIndex: row.current_index,
+    caughtIds: row.caught_ids,
+    currentCardId: row.current_card_id,
     startTime: row.start_time,
     finishTime: row.finish_time,
     wrongGuesses: row.wrong_guesses,
@@ -65,8 +65,8 @@ function rowToTeamState(row: TeamRow): TeamState {
 function teamStateToRow(state: TeamState): Omit<TeamRow, "team_id"> {
   return {
     status: state.status,
-    clue_order: state.clueOrder,
-    current_index: state.currentIndex,
+    caught_ids: state.caughtIds,
+    current_card_id: state.currentCardId,
     start_time: state.startTime,
     finish_time: state.finishTime,
     wrong_guesses: state.wrongGuesses,

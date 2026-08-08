@@ -18,12 +18,13 @@ type HostTeamView = {
   teamName: string;
   color: string;
   status: TeamStatus;
-  clueOrder: string[];
-  currentIndex: number;
+  caughtIds: string[];
+  currentCardId: string | null;
   startTime: number | null;
   finishTime: number | null;
   wrongGuesses: number;
   score: number;
+  caughtCount: number;
   currentPokemonName: string | null;
   currentHidingSpot: string | null;
   currentPoints: number | null;
@@ -85,7 +86,7 @@ export default function HostPage() {
     await refetch();
   }
 
-  const totalClues = teams?.[0]?.clueOrder.length || POKEMON.length;
+  const totalClues = POKEMON.length;
   // Sort by score for a live leaderboard feel, without reordering rows
   // wildly while everyone's still at 0 (keeps roster order as a tiebreak).
   const ranked = [...(teams ?? [])].sort((a, b) => b.score - a.score);
@@ -130,9 +131,7 @@ export default function HostPage() {
                     </td>
                     <td className="p-2 font-pixel text-[10px]">{team.score}</td>
                     <td className="p-2 font-pixel text-[10px]">
-                      {team.status === "unclaimed"
-                        ? "-"
-                        : `${Math.min(team.currentIndex + 1, totalClues)}/${totalClues}`}
+                      {team.status === "unclaimed" ? "-" : `${team.caughtCount}/${totalClues}`}
                     </td>
                     <td className="p-2 font-pixel text-[9px]">
                       <span

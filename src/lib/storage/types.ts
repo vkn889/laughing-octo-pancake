@@ -9,8 +9,13 @@ export type TeamStatus = "unclaimed" | "guessing" | "awaiting_handoff" | "finish
 export type TeamState = {
   teamId: string;
   status: TeamStatus;
-  clueOrder: string[]; // pokemon ids, shuffled once at claim time
-  currentIndex: number; // 0-6
+  /** Pokemon ids this team has confirmed caught, in the order caught. */
+  caughtIds: string[];
+  /** The card currently assigned to this team, or null if none (just
+   *  claimed with an empty pool, or finished). Assigned dynamically from
+   *  the shared pool, not a fixed per-team shuffle — see store.ts
+   *  pickNextCard/reconcileTeam for how the pool is shared across teams. */
+  currentCardId: string | null;
   startTime: number | null;
   finishTime: number | null;
   wrongGuesses: number;
@@ -20,8 +25,8 @@ export function defaultTeamState(teamId: string): TeamState {
   return {
     teamId,
     status: "unclaimed",
-    clueOrder: [],
-    currentIndex: 0,
+    caughtIds: [],
+    currentCardId: null,
     startTime: null,
     finishTime: null,
     wrongGuesses: 0,

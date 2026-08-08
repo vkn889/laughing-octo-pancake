@@ -21,7 +21,7 @@ type PlayerTeamView = {
   teamName: string;
   color: string;
   status: TeamStatus;
-  currentClueNumber: number;
+  caughtCount: number;
   totalClues: number;
   score: number;
   hintText: string | null;
@@ -119,7 +119,7 @@ export default function TeamPage() {
               subtitle={
                 team.status === "finished"
                   ? `Hunt Complete! · ${team.score} pts`
-                  : `Clue ${team.currentClueNumber} of ${team.totalClues} · ${team.score} pts`
+                  : `Caught ${team.caughtCount} of ${team.totalClues} · ${team.score} pts`
               }
             />
           </div>
@@ -141,7 +141,7 @@ export default function TeamPage() {
         {team.status === "awaiting_handoff" && <AwaitingHandoffScreen team={team} />}
 
         {team.status === "finished" && (
-          <FinishedScreen elapsedMs={elapsed} score={team.score} />
+          <FinishedScreen elapsedMs={elapsed} score={team.score} caughtCount={team.caughtCount} />
         )}
       </div>
     </main>
@@ -294,18 +294,22 @@ function AwaitingHandoffScreen({ team }: { team: PlayerTeamView }) {
 function FinishedScreen({
   elapsedMs,
   score,
+  caughtCount,
 }: {
   elapsedMs: number | null;
   score: number;
+  caughtCount: number;
 }) {
   return (
     <PixelPanel tone="screen" className="p-6 flex flex-col items-center gap-4 text-center">
       <Confetti />
       <p className="font-pixel text-4xl">🏆</p>
       <p className="font-pixel text-sm leading-loose text-pokedex-ink">
-        You caught &apos;em all!
+        No cards left, the hunt is over!
       </p>
-      <p className="font-pixel text-[13px] text-pokedex-ink">Final score: {score} pts</p>
+      <p className="font-pixel text-[13px] text-pokedex-ink">
+        You caught {caughtCount} · {score} pts
+      </p>
       {elapsedMs !== null && (
         <p className="font-pixel text-[11px] text-pokedex-ink/80">
           Total time: {formatDuration(elapsedMs)}
