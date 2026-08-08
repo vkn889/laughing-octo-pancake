@@ -1,7 +1,7 @@
 // Pokémon clue set for the scavenger hunt (PRD 1.7 / SRD 2.2).
 //
 // hintText is built from each Pokémon's real Pokédex facts (type,
-// classification, canonical traits) in original wording — not the
+// classification, canonical traits) in original wording, not the
 // verbatim official flavor text (that's Nintendo/Game Freak/The Pokémon
 // Company's copyrighted game text, not something to embed wholesale into
 // a shipped app) and not invented fluff either. The name is never stated
@@ -11,7 +11,7 @@
 // app end-to-end. Before the real party, edit hidingSpot (host-only
 // reference, never shown to players) for your actual venue.
 //
-// image is the official artwork stored locally in /public/pokemon — the
+// image is the official artwork stored locally in /public/pokemon; the
 // clue screen renders it as a black silhouette ("Who's That Pokémon?"
 // style) so it hints at the shape without giving away colors/name.
 
@@ -20,7 +20,7 @@ export type PokemonClue = {
   name: string;
   hintText: string;
   image: string;
-  /** Host-only reference — never sent to player-facing API responses. */
+  /** Host-only reference, never sent to player-facing API responses. */
   hidingSpot: string;
   acceptedAnswers: string[];
 };
@@ -30,7 +30,7 @@ export const POKEMON: PokemonClue[] = [
     id: "torchic",
     name: "Torchic",
     hintText:
-      "Fire-type, the \"Chick Pokémon.\" A sac inside its body keeps a flame burning, so it's always warm to the touch — and it's known for bonding closely with its Trainer right from the start.",
+      "Fire-type, the \"Chick Pokémon.\" A sac inside its body keeps a flame burning, so it's always warm to the touch, and it's known for bonding closely with its Trainer right from the start.",
     image: "/pokemon/torchic.png",
     hidingSpot: "Kitchen counter, behind the fruit bowl",
     acceptedAnswers: ["torchic"],
@@ -48,7 +48,7 @@ export const POKEMON: PokemonClue[] = [
     id: "blaziken",
     name: "Blaziken",
     hintText:
-      "Fire/Fighting dual-type, the \"Blaze Pokémon\" — the final stage of a Hoenn starter line. Its powerful legs can reportedly clear a 30-story building in a single jump, and fire wreathes its fists mid-punch.",
+      "Fire/Fighting dual-type, the \"Blaze Pokémon,\" the final stage of a Hoenn starter line. Its powerful legs can reportedly clear a 30-story building in a single jump, and fire wreathes its fists mid-punch.",
     image: "/pokemon/blaziken.png",
     hidingSpot: "Backyard, tied to the tree",
     acceptedAnswers: ["blaziken"],
@@ -84,7 +84,7 @@ export const POKEMON: PokemonClue[] = [
     id: "greninja",
     name: "Greninja",
     hintText:
-      "Water/Dark dual-type, the \"Ninja Pokémon\" — the final evolution of a Kalos starter line. It compresses water into throwing stars, moves faster than the eye can follow, and wears its long tongue like a scarf.",
+      "Water/Dark dual-type, the \"Ninja Pokémon,\" the final evolution of a Kalos starter line. It compresses water into throwing stars, moves faster than the eye can follow, and wears its long tongue like a scarf.",
     image: "/pokemon/greninja.png",
     hidingSpot: "Garage, on the workbench",
     acceptedAnswers: ["greninja"],

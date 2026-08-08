@@ -39,7 +39,7 @@ async function fetchHostState(): Promise<HostTeamView[]> {
 }
 
 function formatElapsed(startTime: number | null, finishTime: number | null, now: number) {
-  if (!startTime) return "—";
+  if (!startTime) return "-";
   const end = finishTime ?? now;
   const totalSeconds = Math.max(0, Math.floor((end - startTime) / 1000));
   const minutes = Math.floor(totalSeconds / 60);
@@ -115,7 +115,7 @@ export default function HostPage() {
                     </td>
                     <td className="p-2 font-pixel text-[10px]">
                       {team.status === "unclaimed"
-                        ? "—"
+                        ? "-"
                         : `${Math.min(team.currentIndex + 1, totalClues)}/${totalClues}`}
                     </td>
                     <td className="p-2 font-pixel text-[9px]">
@@ -169,7 +169,7 @@ export default function HostPage() {
 
         <PixelPanel tone="white" className="p-3 flex items-center justify-between gap-3">
           <p className="font-pixel text-[8px] text-pokedex-ink/60 leading-relaxed">
-            Testing utility — wipes all team progress.
+            Testing utility: wipes all team progress.
           </p>
           {!resetOpen ? (
             <PixelButton

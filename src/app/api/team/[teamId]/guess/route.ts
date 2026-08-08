@@ -3,7 +3,7 @@ import { submitGuess } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-// POST /api/team/:teamId/guess { guess: string } — fuzzy-matched against
+// POST /api/team/:teamId/guess { guess: string }: fuzzy-matched against
 // the current clue's accepted answers (SRD 2.4). Unlimited retries.
 export async function POST(
   req: Request,

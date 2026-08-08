@@ -17,7 +17,7 @@ const bodyMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Who's That Pokémon? — Scavenger Hunt",
+  title: "Who's That Pokémon? | Scavenger Hunt",
   description: "A retro Pokédex-themed scavenger hunt for the party.",
 };
 

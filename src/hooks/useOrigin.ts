@@ -9,7 +9,7 @@ function getSnapshot() {
 }
 
 function getServerSnapshot() {
-  return ""; // unknown during SSR — matches first client render, avoiding
+  return ""; // unknown during SSR; matches first client render, avoiding
   // the hydration mismatch a `useState(() => window.location.origin)`
   // initializer would cause. React re-renders with the real snapshot
   // right after hydration completes.

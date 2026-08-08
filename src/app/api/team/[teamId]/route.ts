@@ -3,7 +3,7 @@ import { getPlayerTeamView } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
-// GET /api/team/:teamId — polled every ~2s by the clue screen (SRD 2.4).
+// GET /api/team/:teamId: polled every ~2s by the clue screen (SRD 2.4).
 export async function GET(
   _req: Request,
   ctx: { params: Promise<{ teamId: string }> }

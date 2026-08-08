@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import confetti from "canvas-confetti";
 
-/** Fires once on mount — used on the "You caught 'em all!" finish screen. */
+/** Fires once on mount, used on the "You caught 'em all!" finish screen. */
 export function Confetti() {
   useEffect(() => {
     const colors = ["#dc2626", "#2563eb", "#facc15", "#ffffff"];

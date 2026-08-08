@@ -6,7 +6,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
  * Polls `fetcher` every `intervalMs` and exposes the latest result. Used
  * throughout the player + host screens (SRD 2.4: client polls storage every
  * ~2s). Polling pauses while the tab is hidden to save battery, and resumes
- * (with an immediate refetch) when it becomes visible again — covers the
+ * (with an immediate refetch) when it becomes visible again, covering the
  * "close/reopen the site and resume" requirement (SRD 2.5).
  */
 export function usePoll<T>(
@@ -28,7 +28,7 @@ export function usePoll<T>(
       setData(result);
       setError(null);
     } catch {
-      setError("Connection issue — retrying…");
+      setError("Connection issue, retrying…");
     }
   }, []);
 

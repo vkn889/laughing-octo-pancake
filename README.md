@@ -1,4 +1,4 @@
-# Who's That Pokémon? — Scavenger Hunt
+# Who's That Pokémon? Scavenger Hunt
 
 A mobile-first, Pokédex-themed "Who's That Pokémon?" scavenger hunt for a
 birthday party. Built from the PRD/SRD in `pokemon-scavenger-hunt-prd-srd.md`.
@@ -13,17 +13,18 @@ Rayquaza, Froakie → Frogadier → Greninja.
 - Each team gets a random order of the 7 Pokémon, one clue at a time. A
   correct guess (typo-tolerant) locks them into "bring the card to the
   host" until the host taps **Confirm** for that team on `/host`.
-- All state lives in one JSON file on the machine running the server
-  (`data/state.json`, auto-created, gitignored) — no external database, no
-  accounts. Every screen polls that shared state every ~2s, so progress
-  survives a phone refresh or backgrounding.
+- All state is shared, key-value storage read/written through
+  `src/lib/store.ts`, which is backend-agnostic: it goes through whichever
+  storage backend is active (`src/lib/storage/index.ts`), so the same code
+  runs locally and on Vercel.
 
-## Running it for the party
+## Two ways to run it
 
-This app needs to stay running as **one continuous process** for the whole
-event (state lives in server memory/disk, not in a database), and your
-phones need to reach it over the network. Simplest option: run it on your
-laptop and have everyone join over the same WiFi.
+### Option A: Local, for one laptop at the party
+
+No setup, no accounts. State lives in a JSON file
+(`data/state.json`, auto-created, gitignored) on whatever machine runs the
+process.
 
 ```bash
 npm install
@@ -31,35 +32,53 @@ npm run build
 npm run start        # runs on port 3000 by default
 ```
 
-Then find your laptop's LAN IP:
+Find your laptop's LAN IP and share `http://<that-ip>:3000` with players:
 
 ```bash
 # macOS
 ipconfig getifaddr en0    # or en1 if you're on Wi-Fi via a different adapter
 ```
 
-Share `http://<that-ip>:3000` — the QR code on `/host` already encodes
-whatever origin you loaded it from, so open `http://<that-ip>:3000/host` on
-the host device (not `localhost`) and the printed QR will point phones to
-the right address.
+Open `http://<that-ip>:3000/host` (not `localhost`) on the host device;
+the QR code there encodes whatever origin you loaded it from, so it'll
+point phones at the right address.
 
-> Make sure your laptop's firewall allows incoming connections on the port,
-> and that phones are on the *same* WiFi network (guest networks that
-> isolate clients from each other won't work).
+> This mode needs the app to stay running as **one continuous process**
+> for the whole event, and every phone on the **same** WiFi network (guest
+> networks that isolate clients from each other won't work). `npm run dev`
+> works too, for testing on one machine.
 
-Alternatively, run `npm run dev` for local testing on one machine only —
-fine for the walkthrough below, but `next start` is the one you want live.
+### Option B: Deploy to Vercel (a real, always-on URL)
 
-## Before the real party — edit the content
+Vercel's functions are stateless and don't share a filesystem across
+invocations, so the JSON file above only works for Option A. On Vercel,
+the app automatically switches to a Redis-backed store instead. No code
+changes needed, just connect a database:
+
+1. Push this repo to GitHub (or run `vercel` from the CLI) and import it
+   as a new Vercel project.
+2. In the project's **Storage** tab, click **Connect Database** and add a
+   Redis store (Vercel's marketplace integration, powered by Upstash).
+   This injects `KV_REST_API_URL` / `KV_REST_API_TOKEN` into your
+   project's environment automatically, nothing to copy by hand.
+3. Deploy. That's it, every clue guess, handoff confirmation, and the
+   host dashboard all read/write through Redis instead of a local file.
+
+Prefer to wire up storage yourself? Any Upstash Redis database works: set
+`UPSTASH_REDIS_REST_URL` / `UPSTASH_REDIS_REST_TOKEN` (from the Upstash
+console) as project environment variables instead. See `.env.example`.
+
+## Before the real party, edit the content
 
 Everything content-related lives in two files, no code changes needed:
 
-- **`src/lib/pokemon.ts`** — for each of the 7 Pokémon: `hintText` (riddle,
+- **`src/lib/pokemon.ts`**: for each of the 7 Pokémon, `hintText` (riddle,
   never say the name), `hidingSpot` (host-only reference, shown only on
-  `/host`), and `acceptedAnswers`. The current hints are **placeholders**
-  written for testing — swap them for your real riddles and hiding spots.
-- **`src/lib/teams.ts`** — team names/colors if you want something other
-  than the 7 color names.
+  `/host`), and `acceptedAnswers`. Swap `hidingSpot` for your real venue;
+  `hintText` is already built from real Pokédex facts (type,
+  classification, canonical traits) rather than made-up riddles.
+- **`src/lib/teams.ts`**: team names/colors if you want something other
+  than Alpha/Magma/Aqua/Ball/Pegasus/Touch/Doom.
 
 Hint images are the official artwork in `public/pokemon/*.png`, rendered as
 a black silhouette on the clue screen (classic "Who's That Pokémon?"
@@ -75,6 +94,9 @@ look) so they hint at shape without spoiling color/name.
 ## Stack
 
 Next.js App Router + TypeScript + Tailwind v4. Route Handlers under
-`src/app/api/**` are the "backend"; `src/lib/store.ts` is the file-backed
-shared store with an in-process mutex (first write wins on simultaneous
-team claims). No external services required.
+`src/app/api/**` are the "backend"; `src/lib/store.ts` is the shared-state
+API, backed by `src/lib/storage/fileBackend.ts` (local JSON file, guarded
+by an in-process mutex) or `src/lib/storage/redisBackend.ts` (Upstash
+Redis, using an atomic Lua script so simultaneous team claims still
+resolve to exactly one winner across serverless instances). No other
+external services required.

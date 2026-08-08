@@ -8,7 +8,7 @@ type Props = {
   size?: number;
 };
 
-/** Renders a QR code for the given URL — used on /host so reps can scan to join. */
+/** Renders a QR code for the given URL, used on /host so reps can scan to join. */
 export function QrCode({ value, size = 160 }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
