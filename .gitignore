@@ -46,3 +46,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 data/
+
+# raw PokeAPI dump cached by scripts/generate-national-dex.mjs (huge,
+# regeneratable — see src/lib/pokemonNationalDex.ts's header)
+/scripts/.dex-cache.json

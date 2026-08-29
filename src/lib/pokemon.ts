@@ -123,7 +123,12 @@ function chase(
   };
 }
 
-export const POKEMON: PokemonClue[] = [
+import { NATIONAL_DEX_FILLER } from "./pokemonNationalDex";
+
+/** Hand-curated cards matching the real physical collection (see file
+ *  header). National-Dex-wide coverage is appended below via
+ *  NATIONAL_DEX_FILLER — see src/lib/pokemonNationalDex.ts. */
+const CURATED_POKEMON: PokemonClue[] = [
   // --- Charmander line (Kanto starter) ---
   normal({
     id: "charmander",
@@ -877,6 +882,13 @@ export const POKEMON: PokemonClue[] = [
     acceptedAnswers: ["lunala"],
   }),
 ];
+
+// The full 1025-species National Dex, curated cards plus auto-generated
+// placeholders for every species not already in the physical collection
+// above. See src/lib/pokemonNationalDex.ts for how the filler is built —
+// ⚠️ every filler card's hidingSpot is a placeholder that needs editing
+// before a real hunt, just like the curated ones (see file header).
+export const POKEMON: PokemonClue[] = [...CURATED_POKEMON, ...NATIONAL_DEX_FILLER];
 
 export const POKEMON_BY_ID: Record<string, PokemonClue> = Object.fromEntries(
   POKEMON.map((p) => [p.id, p])

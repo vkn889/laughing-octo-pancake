@@ -8,6 +8,7 @@ import { QrCode } from "@/components/QrCode";
 import { MusicToggle } from "@/components/MusicToggle";
 import { usePoll } from "@/hooks/usePoll";
 import { useOrigin } from "@/hooks/useOrigin";
+import { useLocalStorageToggle } from "@/hooks/useLocalStorageToggle";
 import { POKEMON } from "@/lib/pokemon";
 
 type TeamStatus = "unclaimed" | "guessing" | "awaiting_handoff" | "finished";
@@ -54,12 +55,24 @@ function formatElapsed(startTime: number | null, finishTime: number | null, now:
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 }
 
+const AUTO_ACCEPT_STORAGE_KEY = "hostAutoAccept";
+
 export default function HostPage() {
   const { data: teams, refetch } = usePoll<HostTeamView[]>(fetchHostState, 2000);
   const [now, setNow] = useState(() => Date.now());
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
+  // Multiple teams can land on "awaiting_handoff" at once (especially with
+  // auto-accept on), so this tracks every in-flight confirm, not just one.
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
   const joinUrl = useOrigin();
   const [resetOpen, setResetOpen] = useState(false);
+
+  // "Auto-Accept": lets the host skip manually tapping Confirm for every
+  // correct guess. Purely client-side (no server/schema changes) — while
+  // this dashboard is open in a browser with it on, any team that lands on
+  // "awaiting_handoff" gets auto-confirmed the next poll tick, same as if
+  // the host had tapped Confirm themselves. Off by default so nothing
+  // changes unless the host opts in; remembered per-browser.
+  const [autoAccept, toggleAutoAccept] = useLocalStorageToggle(AUTO_ACCEPT_STORAGE_KEY);
 
   useEffect(() => {
     const id = setInterval(() => setNow(Date.now()), 1000);
@@ -67,7 +80,7 @@ export default function HostPage() {
   }, []);
 
   async function confirmHandoff(teamId: string) {
-    setConfirmingId(teamId);
+    setPendingIds((prev) => new Set(prev).add(teamId));
     try {
       await fetch("/api/host/confirm", {
         method: "POST",
@@ -76,9 +89,30 @@ export default function HostPage() {
       });
       await refetch();
     } finally {
-      setConfirmingId(null);
+      setPendingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(teamId);
+        return next;
+      });
     }
   }
+
+  // Drives auto-accept: every time a fresh poll comes in with autoAccept
+  // on, confirm any team that's awaiting handoff and not already being
+  // confirmed. Effectively the same as the host tapping Confirm on every
+  // row, just automatic. The confirm itself is kicked off from a timeout
+  // (a macrotask), not directly in the effect body, so it doesn't trigger
+  // the "setState synchronously in an effect" cascading-render warning.
+  useEffect(() => {
+    if (!autoAccept || !teams) return;
+    for (const team of teams) {
+      if (team.status === "awaiting_handoff" && !pendingIds.has(team.teamId)) {
+        const teamId = team.teamId;
+        setTimeout(() => void confirmHandoff(teamId), 0);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoAccept, teams]);
 
   async function resetAll() {
     await fetch("/api/host/reset", { method: "POST" });
@@ -160,11 +194,15 @@ export default function HostPage() {
                         tone="blue"
                         className="px-3 py-2 min-h-9 text-[9px]"
                         disabled={
-                          team.status !== "awaiting_handoff" || confirmingId === team.teamId
+                          team.status !== "awaiting_handoff" || pendingIds.has(team.teamId)
                         }
                         onClick={() => confirmHandoff(team.teamId)}
                       >
-                        {confirmingId === team.teamId ? "…" : "Confirm"}
+                        {pendingIds.has(team.teamId)
+                          ? "…"
+                          : autoAccept && team.status === "awaiting_handoff"
+                            ? "Auto…"
+                            : "Confirm"}
                       </PixelButton>
                     </td>
                   </tr>
@@ -183,6 +221,22 @@ export default function HostPage() {
             </p>
           </PixelPanel>
         </div>
+
+        <PixelPanel tone="white" className="p-3 flex items-center justify-between gap-3">
+          <p className="font-pixel text-[8px] text-pokedex-ink/60 leading-relaxed">
+            When ON, a correct guess is accepted automatically — no
+            need to tap Confirm once a team has actually been handed the
+            card.
+          </p>
+          <PixelButton
+            tone={autoAccept ? "blue" : "white"}
+            className="px-3 py-2 min-h-9 text-[9px] shrink-0"
+            onClick={toggleAutoAccept}
+            aria-pressed={autoAccept}
+          >
+            {autoAccept ? "Auto-Accept: ON" : "Auto-Accept: OFF"}
+          </PixelButton>
+        </PixelPanel>
 
         <PixelPanel tone="white" className="p-3 flex items-center justify-between gap-3">
           <p className="font-pixel text-[8px] text-pokedex-ink/60 leading-relaxed">
